@@ -10,6 +10,7 @@ public sealed class ShopScreen : IScreen
 {
     public GameState _state;
     private Vector2 _shopPosition = new(50, 50);
+    private readonly Rectangle _back = new (RL.GetScreenWidth() - 270, RL.GetScreenHeight() - 90, 220, 56);
 
     public ShopScreen(GameState gameState)
     {
@@ -27,11 +28,15 @@ public sealed class ShopScreen : IScreen
                 _state.Shop.TryBuy(clickedOffer, _state);
             }
         }
+
+        if(UiButton.IsClicked(_back)) return ScreenState.Menu;
+
         return null;
     }
 
     public void Draw()
     {
         ShopPanel.Draw(_state.Shop, _state.Wallet, _shopPosition);
+        UiButton.Draw(_back, "x");
     }
 }

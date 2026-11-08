@@ -9,7 +9,9 @@ namespace Mandacalm.Screen;
 
 public sealed class PaintScreen : IScreen
 {
-    private const float BrushRadius = 12f;
+    private const float MinBrushRadius = 4f;
+    private const float MaxBrushRadius = 40f;
+    private float _brushRadius = 12f;
     private readonly GameState _state;
     private readonly PaintCanvas _canvas; 
     private readonly MandalaLayout _layout = new(new(RL.GetScreenWidth()/2, RL.GetScreenHeight()/2), 50f, 60f);
@@ -27,7 +29,15 @@ public sealed class PaintScreen : IScreen
     public ScreenState? Update()
     {
         var mousePos = RL.GetMousePosition();
-
+        if (RL.IsKeyPressed(KeyboardKey.Tab))
+        {
+            return ScreenState.Menu;
+        }
+        float wheel = RL.GetMouseWheelMove();
+        if(wheel != 0)
+        {
+            _brushRadius = Math.Clamp(_brushRadius + wheel * 2f, MinBrushRadius, MaxBrushRadius);
+        }
         if(!ReferenceEquals(_state.Mandala, _lastMandala))
         {
             _canvas.Clear();
@@ -58,12 +68,12 @@ public sealed class PaintScreen : IScreen
             else
             {
                 _painting = true;
-                _canvas.Stroke(mousePos, mousePos, BrushRadius, brush);
+                _canvas.Stroke(mousePos, mousePos, _brushRadius, brush);
             }
         }
         else if(RL.IsMouseButtonDown(MouseButton.Left) && _painting)
         {
-            _canvas.Stroke(_lastMouse, mousePos, BrushRadius, brush);
+            _canvas.Stroke(_lastMouse, mousePos, _brushRadius, brush);
         }
 
         if (RL.IsMouseButtonReleased(MouseButton.Left))
@@ -75,11 +85,11 @@ public sealed class PaintScreen : IScreen
             if (RL.IsMouseButtonPressed(MouseButton.Right))
         {
             _erasing = true;
-            _canvas.Stroke(mousePos, mousePos, BrushRadius, PaintCanvas.Paper);
+            _canvas.Stroke(mousePos, mousePos, _brushRadius, PaintCanvas.Paper);
         }
         else if (RL.IsMouseButtonDown(MouseButton.Right) && _erasing)
         {
-            _canvas.Stroke(_lastMouse, mousePos, BrushRadius, PaintCanvas.Paper);
+            _canvas.Stroke(_lastMouse, mousePos, _brushRadius, PaintCanvas.Paper);
         }
         if (RL.IsMouseButtonReleased(MouseButton.Right))
         {
@@ -126,6 +136,23 @@ public sealed class PaintScreen : IScreen
         MandalaRenderer.DrawOutlines(_state.Mandala, _layout);
         PaletteBar.Draw(_state.Palette, _currentColor, _barPosition);
         RL.DrawText($"Points: {_state.Wallet.Points}", 50, 780 - 50, 20, Color.Black);
+
+        Vector2 mouse = RL.GetMousePosition();
+        bool overPaletteBar = PaletteBar.GetIndexAt(_state.Palette, _barPosition, mouse) >= 0;
+        if (!overPaletteBar)
+        {
+            RL.DrawCircleLines((int)mouse.X, (int)mouse.Y, _brushRadius, Color.Black);
+            RL.DrawCircleLines((int)mouse.X, (int)mouse.Y, _brushRadius + 1f, Color.White);
+        }
+    }
+
+    public void OnEnter()
+    {
+        if(!ReferenceEquals(_state.Mandala, _lastMandala))
+        {
+            _canvas.Clear();
+            _lastMandala = _state.Mandala;
+        }
     }
 
     public void SaveCanvas(string path) => _canvas.Export(path);

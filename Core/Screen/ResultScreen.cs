@@ -18,7 +18,7 @@ public sealed class ResultScreen : IScreen
     {
         if (RL.IsKeyPressed(KeyboardKey.Enter))
         {
-            return ScreenState.Painting;
+            return ScreenState.Menu;
         }
         return null;
     }

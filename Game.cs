@@ -23,6 +23,9 @@ public sealed class Game
             [ScreenState.Painting] = _paintScreen,
             [ScreenState.Shop] = new ShopScreen(_state),
             [ScreenState.Result] = new ResultScreen(_state),
+            [ScreenState.Menu] = new MenuScreen(),
+            [ScreenState.Generator] = new GeneratorScreen(_state),
+
         };
         GameSnapShot? shot = _saveSystem.Load();
         if(shot != null && _state.Restore(shot))
@@ -37,20 +40,21 @@ public sealed class Game
             Save();
             _lastSaveTime = RL.GetTime();
         }
-        if (RL.IsKeyPressed(KeyboardKey.Tab))
-        {
-            _current = _current switch
-            {
-                ScreenState.Painting => ScreenState.Shop,
-                ScreenState.Shop => ScreenState.Painting,
-                ScreenState.Result => _current,
-                _ => throw new ArgumentException(),
-            };
-        }
+        // if (RL.IsKeyPressed(KeyboardKey.Tab))
+        // {
+        //     _current = _current switch
+        //     {
+        //         ScreenState.Painting => ScreenState.Shop,
+        //         ScreenState.Shop => ScreenState.Painting,
+        //         ScreenState.Result => _current,
+        //         _ => throw new ArgumentException(),
+        //     };
+        // }
         ScreenState? nextScreen = _screens[_current].Update();
         if (nextScreen != null)
         {
             _current = nextScreen.Value;
+            _screens[_current].OnEnter();
             Save();
         }
 #if DEBUG
