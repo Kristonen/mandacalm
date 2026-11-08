@@ -29,4 +29,18 @@ public static class MandalaRenderer{
             RL.DrawRingLines(layout.Center, cellInner, cellOuter, startAngle, endAngle, 32, Color.Black);
         }
     }
+
+    public static void DrawOutlines(Mandala mandala, MandalaLayout layout)
+    {
+        float segmentAngle = 360f / mandala.Parameters.SegmentCount;
+        foreach(var cell in mandala.AllCells)
+        {
+            float cellInner = layout.InnerRadius + cell.Ring * layout.RingWidth;
+            float cellOuter = cellInner + layout.RingWidth;
+            float startAngle = cell.Segment * segmentAngle;
+            float endAngle = startAngle + segmentAngle;
+
+            RL.DrawRingLines(layout.Center, cellInner, cellOuter, startAngle, endAngle, 32, Color.Black);
+        }
+    }
 }

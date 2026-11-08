@@ -2,12 +2,13 @@ using Raylib_cs;
 using RL = Raylib_cs.Raylib;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Mandacalm.Rendering;
 
 public sealed class PaintCanvas : IDisposable
 {
-    private static readonly Color Paper = Color.LightGray;
+    public static readonly Color Paper = Color.LightGray;
     private RenderTexture2D _texture;
     private readonly int _width;
     private readonly int _height;
@@ -45,5 +46,12 @@ public sealed class PaintCanvas : IDisposable
     public void Dispose()
     {
         RL.UnloadRenderTexture(_texture);
+    }
+
+    public Image ReadImage()
+    {
+        Image image = RL.LoadImageFromTexture(_texture.Texture); 
+        RL.ImageFlipVertical(ref image);
+        return image;
     }
 }
