@@ -13,19 +13,21 @@ public sealed class Game
     private ScreenState _current = ScreenState.Painting;
     private SaveSystem _saveSystem = new();
     private double _lastSaveTime;
+    private readonly PaintScreen _paintScreen;
 
     public Game()
     {
+        _paintScreen = new PaintScreen(_state);
         _screens = new()
         {
-            [ScreenState.Painting] = new PaintScreen(_state),
+            [ScreenState.Painting] = _paintScreen,
             [ScreenState.Shop] = new ShopScreen(_state),
             [ScreenState.Result] = new ResultScreen(_state),
         };
         GameSnapShot? shot = _saveSystem.Load();
-        if(shot != null)
+        if(shot != null && _state.Restore(shot))
         {
-            _state.Restore(shot);
+            _paintScreen.LoadCanvas(_saveSystem.CanvasPath);
         }
     }
     public void Update()
@@ -79,8 +81,8 @@ public sealed class Game
 
     public void Save()
     {
-        GameSnapShot shot = _state.CreateSnapshot();
-        _saveSystem.Save(shot);
+        _saveSystem.Save(_state.CreateSnapshot());
+        _paintScreen.SaveCanvas(_saveSystem.CanvasPath);
         _lastSaveTime = RL.GetTime();
     }
 

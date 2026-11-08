@@ -54,4 +54,52 @@ public sealed class PaintCanvas : IDisposable
         RL.ImageFlipVertical(ref image);
         return image;
     }
+
+    public bool Export(string path)
+    {
+        string temp = Path.ChangeExtension(path, ".tmp.png");
+        Image image = ReadImage();
+        bool ok = RL.ExportImage(image, temp);
+        RL.UnloadImage(image);
+        if (!ok)
+        {
+            return false;
+        }
+
+        try
+        {
+            File.Move(temp, path, true);
+            return true;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+
+    public bool Import(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return false;
+        }
+
+        Image image = RL.LoadImage(path);
+        if(image.Width != _width || image.Height != _height)
+        {
+            RL.UnloadImage(image);
+            return false;
+        }
+
+        Texture2D texture = RL.LoadTextureFromImage(image);
+        RL.UnloadImage(image);
+
+        RL.BeginTextureMode(_texture);
+        RL.ClearBackground(Paper);
+        RL.DrawTexture(texture, 0, 0, Color.White);
+        RL.EndTextureMode();
+
+        RL.UnloadTexture(texture);
+        return true;
+    }
 }

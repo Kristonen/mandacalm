@@ -7,6 +7,7 @@ namespace Mandacalm.Persistance;
 public sealed class SaveSystem
 {
     private readonly string _path;
+    public string CanvasPath { get; }
     private static readonly JsonSerializerOptions Options = new()
     {
         WriteIndented = true,
@@ -20,6 +21,7 @@ public sealed class SaveSystem
         );
         Directory.CreateDirectory(folder);
         _path = Path.Combine(folder, "save.json");
+        CanvasPath = Path.Combine(folder, "canvas.png");
     }
 
     public void Save(GameSnapShot shot)

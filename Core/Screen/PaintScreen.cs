@@ -28,7 +28,7 @@ public sealed class PaintScreen : IScreen
     {
         var mousePos = RL.GetMousePosition();
 
-        if(ReferenceEquals(_state.Mandala, _lastMandala))
+        if(!ReferenceEquals(_state.Mandala, _lastMandala))
         {
             _canvas.Clear();
             _lastMandala = _state.Mandala;
@@ -103,6 +103,8 @@ public sealed class PaintScreen : IScreen
 
             if (_state.TrySubmit())
             {
+                _canvas.Clear();
+                _lastMandala = _state.Mandala;
                 return ScreenState.Result;
             }
 
@@ -124,5 +126,13 @@ public sealed class PaintScreen : IScreen
         MandalaRenderer.DrawOutlines(_state.Mandala, _layout);
         PaletteBar.Draw(_state.Palette, _currentColor, _barPosition);
         RL.DrawText($"Points: {_state.Wallet.Points}", 50, 780 - 50, 20, Color.Black);
+    }
+
+    public void SaveCanvas(string path) => _canvas.Export(path);
+
+    public void LoadCanvas(string path)
+    {
+        _canvas.Import(path);
+        _lastMandala = _state.Mandala;
     }
 }
